@@ -1,3 +1,4 @@
+https://raviipariharr.github.io/NotGPT/
 The Future-Ready Guessing Engine
 All the intelligence of tomorrow, none of the accuracy.
 A hilarious parody of AI-powered tools that pretends to predict your future, guess your name, analyze your face, and help you make decisions—but with hilariously useless results.

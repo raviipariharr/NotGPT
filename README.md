@@ -1,0 +1,2 @@
+# NotGPT
+stupid ai 

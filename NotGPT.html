@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotGPT - The Future-Ready Guessing Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #2d3436 0%, #4a5568 50%, #5a6c7d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            color: #e8eaed;
+            margin: 50px 0 40px;
+            max-width: 900px;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .header .tagline {
+            font-size: 1.4em;
+            opacity: 0.95;
+            font-weight: 400;
+            color: #b8c5d6;
+        }
+
+        .header .subtitle {
+            font-size: 1.05em;
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 8px;
+            color: #9ca9b8;
+        }
+
+        .dark-mode-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e8eaed;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .dark-mode-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: linear-gradient(145deg, #3d4651, #2f3640);
+            border-radius: 20px;
+            padding: 35px 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .module-card:hover::before {
+            opacity: 1;
+        }
+
+        .module-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .module-card .icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .module-card h2 {
+            font-size: 1.6em;
+            margin-bottom: 12px;
+            color: #e8eaed;
+            font-weight: 600;
+        }
+
+        .module-card p {
+            color: #9ca9b8;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .panel {
+            background: linear-gradient(145deg, #3d4651, #323a45);
+            border-radius: 20px;
+            padding: 45px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            display: none;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .panel.active {
+            display: block;
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel h2 {
+            color: #e8eaed;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .panel-description {
+            text-align: center;
+            color: #9ca9b8;
+            margin-bottom: 30px;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #b8c5d6;
+            font-size: 0.95em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.2);
+            color: #e8eaed;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        .input-group input::placeholder {
+            color: #6b7785;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4a5a6a 0%, #5f7283 100%);
+            color: #e8eaed;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1em;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #556575 0%, #6a7f92 100%);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #404b57 0%, #4f5d6b 100%);
+            margin-top: 15px;
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #5a6c7d 0%, #6b7f94 100%);
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #7f8fa6;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #b8c5d6;
+            font-size: 1.15em;
+            font-weight: 500;
+        }
+
+        .result {
+            background: rgba(0,0,0,0.2);
+            border-left: 4px solid #7f8fa6;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            display: none;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .result.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-text {
+            font-size: 1.2em;
+            color: #e8eaed;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .note {
+            font-size: 0.85em;
+            color: #7f8fa6;
+            font-style: italic;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: #b8c5d6;
+            border: 2px solid rgba(255,255,255,0.2);
+            margin-top: 25px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        #video-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            min-height: 375px;
+        }
+
+        #webcam {
+            width: 100%;
+            display: none;
+            transform: scaleX(-1);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 375px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #2d3640, #1f2630);
+            color: #7f8fa6;
+            font-size: 1.1em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .analysis-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #00ff41;
+            font-size: 1.5em;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0,255,65,0.5);
+        }
+
+        .analysis-overlay.active {
+            display: flex;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .mirror-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            color: #7f8fa6;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            color: #e8eaed;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .observation {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 3px solid #7f8fa6;
+        }
+
+        .observation-title {
+            color: #b8c5d6;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .observation-text {
+            color: #9ca9b8;
+            line-height: 1.6;
+        }
+
+        .category-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .category-btn {
+            background: rgba(0,0,0,0.2);
+            color: #e8eaed;
+            border: 2px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .category-btn:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.selected {
+            background: linear-gradient(135deg, #4a5a6a 0%, #5f7283 100%);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #3d4651, #323a45);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-content h3 {
+            color: #e8eaed;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            color: #9ca9b8;
+            font-size: 1.2em;
+            margin-bottom: 25px;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .category-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-btn" onclick="showDarkModeMessage()">🌙 Dark Mode</button>
+
+    <div class="header">
+        <h1>🤖 NotGPT</h1>
+        <div class="tagline">The Future-Ready Guessing Engine</div>
+        <div class="subtitle">All the intelligence of tomorrow, none of the accuracy.</div>
+    </div>
+
+    <div class="container">
+        <div class="modules" id="modules">
+            <div class="module-card" onclick="showModule('future')">
+                <div class="icon">🔮</div>
+                <h2>Predict My Future</h2>
+                <p>Discover what awaits you in the quantum realm of possibilities</p>
+            </div>
+            <div class="module-card" onclick="showModule('name')">
+                <div class="icon">🧠</div>
+                <h2>Guess My Name</h2>
+                <p>Using advanced telepathic algorithms to read your thoughts</p>
+            </div>
+            <div class="module-card" onclick="showModule('mirror')">
+                <div class="icon">🪞</div>
+                <h2>AI Mirror</h2>
+                <p>Revolutionary facial analysis technology that tells it like it is</p>
+            </div>
+            <div class="module-card" onclick="showModule('decider')">
+                <div class="icon">🎲</div>
+                <h2>Decision Decider</h2>
+                <p>When you can't decide, our AI still can't either.</p>
+            </div>
+        </div>
+
+        <div class="panel" id="future-panel">
+            <h2>🔮 Future Predictor</h2>
+            <div class="input-group">
+                <label for="future-name">Enter your name (optional):</label>
+                <input type="text" id="future-name" placeholder="e.g., Neo">
+            </div>
+            <button class="btn" onclick="predictFuture()">Predict My Future</button>
+            
+            <div class="loading" id="future-loading">
+                <div class="spinner"></div>
+                <div class="loading-text" id="future-loading-text">Analyzing quantum probability fields...</div>
+            </div>
+
+            <div class="result" id="future-result">
+                <div class="result-text" id="future-prediction"></div>
+                <button class="btn btn-secondary" onclick="predictFuture()">Predict Again</button>
+                <button class="btn btn-share" onclick="showShareModal()">📤 Share with friends</button>
+            </div>
+
+            <button class="btn back-btn" onclick="hideModules()">← Back to Main</button>
+        </div>
+
+        <div class="panel" id="name-panel">
+            <h2>🧠 Name Guesser</h2>
+            <p class="panel-description">
+                Think of a name. Ready? Now type it so I can scan your brainwaves.
+            </p>
+            <div class="input-group">
+                <label for="thought-name">Type the name you're thinking of:</label>
+                <input type="text" id="thought-name" placeholder="e.g., Sarah">
+            </div>
+            <button class="btn" onclick="guessName()">Guess My Name</button>
+            
+            <div class="loading" id="name-loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Calibrating neural subroutines...</div>
+            </div>
+
+            <div class="result" id="name-result">
+                <div class="result-text" id="name-guess"></div>
+                <div class="note">Powered by advanced coincidence detection technology.</div>
+                <button class="btn btn-secondary" onclick="resetNameGuesser()">Try Another Name</button>
+                <button class="btn btn-share" onclick="showShareModal()">📤 Share with friends</button>
+            </div>
+
+            <button class="btn back-btn" onclick="hideModules()">← Back to Main</button>
+        </div>
+
+        <div class="panel" id="mirror-panel">
+            <h2>🪞 AI Mirror</h2>
+            <p class="panel-description">
+                Let our cutting-edge facial recognition AI analyze your current state of being.
+            </p>
+            
+            <div id="video-container">
+                <video id="webcam" autoplay playsinline></video>
+                <div class="video-placeholder" id="video-placeholder">
+                    📷 Click "Activate Mirror" to begin analysis
+                </div>
+                <div class="analysis-overlay" id="analysis-overlay">SCANNING...</div>
+            </div>
+
+            <button class="btn" id="mirror-btn" onclick="toggleMirror()">Activate Mirror</button>
+            
+            <div class="loading" id="mirror-loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Processing facial data matrices...</div>
+            </div>
+
+            <div class="result" id="mirror-result">
+                <div class="mirror-results" id="mirror-stats"></div>
+                <div class="observation">
+                    <div class="observation-title">🔍 AI Observation:</div>
+                    <div class="observation-text" id="mirror-observation"></div>
+                </div>
+                <button class="btn btn-secondary" onclick="analyzeFace()">Analyze Again</button>
+                <button class="btn btn-share" onclick="showShareModal()">📤 Share with friends</button>
+            </div>
+
+            <button class="btn back-btn" onclick="hideModules(); stopWebcam();">← Back to Main</button>
+        </div>
+
+        <div class="panel" id="decider-panel">
+            <h2>🎲 Decision Decider</h2>
+            <p class="panel-description">
+                When you can't decide, our AI still can't either.
+            </p>
+
+            <div class="category-buttons">
+                <button class="category-btn" onclick="selectCategory('productive')">🧠 Productive</button>
+                <button class="category-btn" onclick="selectCategory('lazy')">💤 Lazy</button>
+                <button class="category-btn" onclick="selectCategory('chaotic')">💥 Chaotic</button>
+                <button class="category-btn" onclick="selectCategory('creative')">🎨 Creative</button>
+            </div>
+
+            <div class="loading" id="decider-loading">
+                <div class="spinner"></div>
+                <div class="loading-text" id="decider-loading-text">Calibrating neural procrastination cores...</div>
+            </div>
+
+            <div class="result" id="decider-result">
+                <div class="result-text" id="decider-suggestion"></div>
+                <button class="btn btn-secondary" onclick="decideAgain()">Try Again</button>
+                <button class="btn btn-share" onclick="showShareModal()">📤 Share with friends</button>
+            </div>
+
+            <button class="btn back-btn" onclick="hideModules()">← Back to Main</button>
+        </div>
+    </div>
+
+    <div class="modal" id="share-modal">
+        <div class="modal-content">
+            <h3>🚫 Share Feature</h3>
+            <p>Don't. Nobody cares.</p>
+            <button class="btn" onclick="closeModal()">Okay, fine.</button>
+        </div>
+    </div>
+
+    <div class="modal" id="dark-mode-modal">
+        <div class="modal-content">
+            <h3>🌙 Dark Mode</h3>
+            <p>I don't want more dark as your future.</p>
+            <button class="btn" onclick="closeModal()">Understood 😔</button>
+        </div>
+    </div>
+
+    <script>
+        const predictions = [
+            "In the near future, you will open your fridge and forget why.",
+            "Tomorrow, a bird will judge you silently.",
+            "You'll start a new project and abandon it by Wednesday.",
+            "A sock will mysteriously disappear from your laundry within 72 hours.",
+            "You will experience a profound connection with a snack at 3 AM.",
+            "Someone will pronounce your name wrong, and you won't correct them.",
+            "You'll have a brilliant idea in the shower and forget it immediately.",
+            "A random song from 2009 will get stuck in your head for no reason.",
+            "You will pretend to understand something you absolutely do not understand.",
+            "Your phone will fall out of your pocket in the most inconvenient location possible.",
+            "You'll laugh at your own joke and nobody else will.",
+            "A plant you forgot about will either thrive or die dramatically.",
+            "You will walk into a room and completely forget your purpose for being there.",
+            "Someone will spoil the ending of a show you were planning to watch.",
+            "You'll add items to your online cart and never complete the purchase."
+        ];
+
+        const loadingMessages = [
+            "Analyzing quantum probability fields...",
+            "Consulting the cosmic databanks...",
+            "Decoding temporal anomalies...",
+            "Synchronizing with parallel universes...",
+            "Processing prophetic algorithms..."
+        ];
+
+        const mirrorObservations = [
+            "You look like someone who just debugged for 6 hours.",
+            "Strong aura of someone who says 'I'll just do one more thing' at 2 AM.",
+            "Detected: The face of someone who forgot what they opened the browser for.",
+            "Your vibe says 'I have 47 browser tabs open right now.'",
+            "Analysis indicates you've restarted your computer at least once today.",
+            "Facial patterns suggest you recently Googled something you already knew.",
+            "Energy signature matches someone who just realized it's not the weekend.",
+            "You appear to be 73% confident you turned off the stove.",
+            "Detected traces of 'I'll start my diet on Monday' energy.",
+            "Your expression indicates recent interaction with printer technology.",
+            "Analysis reveals mild existential contemplation about dinner choices.",
+            "Biometric data suggests you've said 'one more episode' tonight.",
+            "Facial recognition confirms you're wearing yesterday's shirt.",
+            "You have the look of someone who just found a bug in production."
+        ];
+
+        const deciderSuggestions = {
+            productive: [
+                "Reorganize your to-do list until you feel productive.",
+                "Color-code your calendar with 17 different shades of importance.",
+                "Create a spreadsheet to track your other spreadsheets.",
+                "Write a detailed plan for something you'll never do.",
+                "Optimize your morning routine until you're late.",
+                "Research productivity apps for the next 4 hours."
+            ],
+            lazy: [
+                "Take a nap but pretend it's meditation.",
+                "Watch 'motivational' videos while lying in bed.",
+                "Order food delivery and call it 'self-care.'",
+                "Scroll through your phone and call it 'staying informed.'",
+                "Cancel all your plans and feel zero guilt about it.",
+                "Contemplate exercising. That counts."
+            ],
+            chaotic: [
+                "Uninstall and reinstall your operating system for fun.",
+                "Rearrange all your furniture at 3 AM.",
+                "Start learning a new language you'll forget in a week.",
+                "Delete a random app and see if you miss it.",
+                "Eat dessert first. Establish dominance.",
+                "Reply to a 6-month-old message with 'sorry just saw this.'"
+            ],
+            creative: [
+                "Paint your error logs.",
+                "Write poetry about your Wi-Fi connection.",
+                "Design a logo for your imaginary startup.",
+                "Create a playlist for a mood that doesn't exist yet.",
+                "Doodle in the margins of something important.",
+                "Invent a new keyboard shortcut nobody asked for."
+            ]
+        };
+
+        const deciderLoadingMessages = [
+            "Calibrating neural procrastination cores...",
+            "Analyzing universal entropy...",
+            "Consulting the chaos matrix...",
+            "Spinning the wheel of indecision...",
+            "Asking the void for guidance..."
+        ];
+
+        function showShareModal() {
+            document.getElementById('share-modal').classList.add('active');
+        }
+
+        function showDarkModeMessage() {
+            document.getElementById('dark-mode-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('share-modal').classList.remove('active');
+            document.getElementById('dark-mode-modal').classList.remove('active');
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+
+        function showModule(module) {
+            document.getElementById('modules').style.display = 'none';
+            document.getElementById(`${module}-panel`).classList.add('active');
+        }
+
+        function hideModules() {
+            document.getElementById('modules').style.display = 'grid';
+            document.getElementById('future-panel').classList.remove('active');
+            document.getElementById('name-panel').classList.remove('active');
+            document.getElementById('mirror-panel').classList.remove('active');
+            document.getElementById('decider-panel').classList.remove('active');
+            resetPanels();
+        }
+
+        function resetPanels() {
+            document.getElementById('future-result').classList.remove('active');
+            document.getElementById('name-result').classList.remove('active');
+            document.getElementById('mirror-result').classList.remove('active');
+            document.getElementById('decider-result').classList.remove('active');
+            document.getElementById('future-name').value = '';
+            document.getElementById('thought-name').value = '';
+            selectedCategory = null;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        function predictFuture() {
+            const name = document.getElementById('future-name').value.trim();
+            const loading = document.getElementById('future-loading');
+            const result = document.getElementById('future-result');
+            const loadingText = document.getElementById('future-loading-text');
+            
+            result.classList.remove('active');
+            loading.classList.add('active');
+            
+            const randomLoadingMsg = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+            loadingText.textContent = randomLoadingMsg;
+
+            setTimeout(() => {
+                loading.classList.remove('active');
+                
+                const prediction = predictions[Math.floor(Math.random() * predictions.length)];
+                const greeting = name ? `${name}, here's what I see: ` : "Here's what the future holds: ";
+                
+                document.getElementById('future-prediction').innerHTML = 
+                    `<strong>${greeting}</strong><br><br>"${prediction}"`;
+                
+                result.classList.add('active');
+            }, 3000);
+        }
+
+        function guessName() {
+            const thoughtName = document.getElementById('thought-name').value.trim();
+            
+            if (!thoughtName) {
+                alert('Please enter a name first! How else can I read your mind? 🧠');
+                return;
+            }
+
+            const loading = document.getElementById('name-loading');
+            const result = document.getElementById('name-result');
+            
+            result.classList.remove('active');
+            loading.classList.add('active');
+
+            setTimeout(() => {
+                loading.classList.remove('active');
+                
+                document.getElementById('name-guess').innerHTML = 
+                    `<strong>I knew it!</strong><br><br>You were thinking of <strong>"${thoughtName}"</strong>.<br><br>✨ Accuracy: 100% ✨`;
+                
+                result.classList.add('active');
+            }, 3000);
+        }
+
+        function resetNameGuesser() {
+            document.getElementById('thought-name').value = '';
+            document.getElementById('name-result').classList.remove('active');
+        }
+
+        async function toggleMirror() {
+            const btn = document.getElementById('mirror-btn');
+            const webcam = document.getElementById('webcam');
+            const placeholder = document.getElementById('video-placeholder');
+
+            if (!mirrorActive) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    webcam.srcObject = stream;
+                    webcam.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    mirrorActive = true;
+                    btn.textContent = 'Analyze My Face';
+                    btn.onclick = analyzeFace;
+                } catch (err) {
+                    alert('Unable to access webcam. Please grant permission and try again. Error: ' + err.message);
+                }
+            }
+        }
+
+        function analyzeFace() {
+            const loading = document.getElementById('mirror-loading');
+            const result = document.getElementById('mirror-result');
+            const overlay = document.getElementById('analysis-overlay');
+            
+            result.classList.remove('active');
+            overlay.classList.add('active');
+            loading.classList.add('active');
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                loading.classList.remove('active');
+
+                const confidence = Math.floor(Math.random() * 15) + 1;
+                const energy = Math.floor(Math.random() * 40) + 10;
+                const focus = Math.floor(Math.random() * 30) + 5;
+                const chaos = Math.floor(Math.random() * 90) + 10;
+
+                const observation = mirrorObservations[Math.floor(Math.random() * mirrorObservations.length)];
+
+                document.getElementById('mirror-stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">Confidence</div>
+                        <div class="stat-value">${confidence}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Energy Level</div>
+                        <div class="stat-value">${energy}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Focus</div>
+                        <div class="stat-value">${focus}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Inner Chaos</div>
+                        <div class="stat-value">${chaos}%</div>
+                    </div>
+                `;
+
+                document.getElementById('mirror-observation').textContent = observation;
+                result.classList.add('active');
+            }, 3000);
+        }
+
+        function stopWebcam() {
+            if (typeof stream !== 'undefined' && stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            mirrorActive = false;
+            const webcam = document.getElementById('webcam');
+            const placeholder = document.getElementById('video-placeholder');
+            const btn = document.getElementById('mirror-btn');
+            
+            webcam.style.display = 'none';
+            webcam.srcObject = null;
+            placeholder.style.display = 'flex';
+            btn.textContent = 'Activate Mirror';
+            btn.onclick = toggleMirror;
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            const loading = document.getElementById('decider-loading');
+            const result = document.getElementById('decider-result');
+            const loadingText = document.getElementById('decider-loading-text');
+            
+            result.classList.remove('active');
+            loading.classList.add('active');
+            
+            const randomLoadingMsg = deciderLoadingMessages[Math.floor(Math.random() * deciderLoadingMessages.length)];
+            loadingText.textContent = randomLoadingMsg;
+
+            setTimeout(() => {
+                loading.classList.remove('active');
+                
+                const suggestions = deciderSuggestions[category];
+                const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+                
+                const categoryEmojis = {
+                    productive: '🧠',
+                    lazy: '💤',
+                    chaotic: '💥',
+                    creative: '🎨'
+                };
+                
+                document.getElementById('decider-suggestion').innerHTML = 
+                    `<strong>${categoryEmojis[category]} ${category.charAt(0).toUpperCase() + category.slice(1)} Decision:</strong><br><br>"${suggestion}"`;
+                
+                result.classList.add('active');
+            }, 2500);
+        }
+
+        function decideAgain() {
+            if (!selectedCategory) return;
+            selectCategory(selectedCategory);
+        }
+
+        function closeModal() {
+            document.getElementById('share-modal').classList.remove('active');
+            document.getElementById('dark-mode-modal').classList.remove('active');
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
